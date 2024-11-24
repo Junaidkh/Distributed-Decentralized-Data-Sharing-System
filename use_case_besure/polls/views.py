@@ -40,16 +40,26 @@ def search(request):
     if request.method == 'POST':
         forms = Search(request.POST)
         if forms.is_valid():
-            forms.save()
-            bloodgroup = forms.cleaned_data['blood_group']
-            state = forms.cleaned_data['state']
-            city = forms.cleaned_data['city']
-            donor_filter = donor_Registration.objects.filter(blood_group=bloodgroup,
-                                                             state=state,
-                                                             city=city,
-                                                             )
+            # Get cleaned data from the form
+            bloodgroup = forms.cleaned_data.get('blood_group', None)
+            state = forms.cleaned_data.get('state', None)
+            city = forms.cleaned_data.get('city', None)
+
+            # Build a dynamic query using Q objects
+            query = Q()
+            if bloodgroup:  # Add condition if blood_group is provided
+                query &= Q(blood_group__icontains=bloodgroup)
+            if state:  # Add condition if state is provided
+                query &= Q(state__icontains=state)
+            if city:  # Add condition if city is provided
+                query &= Q(city__icontains=city)
+
+            # Filter donors based on the query
+            donor_filter = donor_Registration.objects.filter(query)
+
             context = {
-                'donor_filter': donor_filter
+                'forms': forms,
+                'donor_filter': donor_filter,  # Pass the results to the template
             }
 
             return render(request, 'polls/search_list.html', context)
