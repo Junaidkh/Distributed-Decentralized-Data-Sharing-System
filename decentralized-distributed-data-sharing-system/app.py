@@ -229,7 +229,7 @@ def register_and_gossip_with_peers():
         gossip_routing_table()
         time.sleep(3)  # Gossip every 10 seconds
 
-replication_factor = 2  # Number of nodes to replicate each file
+replication_factor = 1  # Number of nodes to replicate each file
 
 # Route for uploading a file with replication
 @app.route('/upload', methods=['GET', 'POST'])
@@ -271,7 +271,7 @@ def replicate_file_to_peers(file_name):
 
     node_id = f"{local_ip}:{local_port}"
     peers = [peer for peer in routing_table if peer != node_id]
-    replication_factor = min(len(peers), 3)  # Replicate to up to 3 peers
+    replication_factor = min(len(peers), 1)  # Replicate to up to 1 peers
     selected_peers = random.sample(peers, replication_factor)
 
     try:
